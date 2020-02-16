@@ -20,13 +20,14 @@ $(document).ready(function() {
 /* BEGIN: Toggle Button */
 var themeSwitcherEl = '#theme-option-switcher input';
 var darkThemeClass = 'dark-theme';
+var darkThemeToggle = '#darkToggle';
 
 $(document).ready(function() {
     $().button('toggle');
 
     if(window.matchMedia("(prefers-color-scheme: dark)").matches){
         $('body').addClass(darkThemeClass);
-        $('#darkToggle').parent().addClass('active').siblings().removeClass('active')
+        $(darkThemeToggle).parent().addClass('active').siblings().removeClass('active')
     }
 
     $(themeSwitcherEl).on('change', function() {
@@ -61,7 +62,6 @@ var rangeSliderRating = function(max) {
 var rangeSliderConfig = [{
         el: '.price-range',
         config: {
-            skin: 'flat',
             type: "double",
             grid: false,
             step: 10,
@@ -195,6 +195,7 @@ var slickConfig = [{
             dots: false,
             prevArrow: '<button type="button" class="slick-prev-style-3 mr-3 mb-2"><i class="fa fa-angle-left"></i></button>',
             nextArrow: '<button type="button" class="slick-next-style-3 mr-3 mb-2"><i class="fa fa-angle-right"></i></button>',
+            slidesToShow: 1,
             responsive: [{
                     breakpoint: 768,
                     settings: {
@@ -241,12 +242,6 @@ var slickConfig = [{
                     settings: {
                         slidesToShow: 2,
                     }
-                },
-                {
-                    breakpoint: 375,
-                    settings: {
-                        slidesToShow: 1,
-                    }
                 }
             ]
         }
@@ -264,12 +259,6 @@ var slickConfig = [{
                     breakpoint: 992,
                     settings: {
                         slidesToShow: 2,
-                    }
-                },
-                {
-                    breakpoint: 375,
-                    settings: {
-                        slidesToShow: 1,
                     }
                 }
             ]
@@ -306,12 +295,6 @@ var slickConfig = [{
                     settings: {
                         slidesToShow: 2,
                     }
-                },
-                {
-                    breakpoint: 375,
-                    settings: {
-                        slidesToShow: 1,
-                    }
                 }
             ]
         }
@@ -330,12 +313,6 @@ var slickConfig = [{
                     breakpoint: 992,
                     settings: {
                         slidesToShow: 2,
-                    }
-                },
-                {
-                    breakpoint: 375,
-                    settings: {
-                        slidesToShow: 1,
                     }
                 }
             ],
@@ -422,13 +399,12 @@ $(document).ready(function () {
         $(arr.el).slick(arr.config);
     })
 
-    // Fix Bug 
-    if ($(window).width() < 375) {
-        setTimeout(function() {
-            $('.home-carousel3').slick('slickSetOption', 'slideToShow', 1, true);
-        }, 500);
+    // Fix Bug
+    var viewport = $(window).width();
+
+    if (viewport < 375) {
         $('.product-carousel1').slick('slickSetOption', 'slideToShow', 1, true);
-    } else if ($(window).width() >= 375 && $(window).width() <= 768) {
+    } else if (viewport >= 375 && viewport <= 768) {
         $('.blog-carousel1').slick('slickSetOption', 'slideToShow', 2, true);
     }
 })
@@ -473,7 +449,6 @@ $(document).ready(function(){
     })
 })
 /* END: Comparation */
-
 
 /* BEGIN: Custom Tab Trigger */
 $(document).ready(function() {
@@ -685,6 +660,7 @@ var productGridEl = '#product-grid';
 var productGridTargetEl = '.product';
 var productGridSwictherEl = '#grid-option-swicther input';
 var productGridBreakpoint = {
+    xxs: 240,
     xs: 375,
     sm: 576,
     md: 768,
@@ -713,17 +689,22 @@ var productGridCol = function(target, col) {
 }
 var productGridSet = function() {
     var viewport = $(window).width();
+    var breakpoint = $(productGridEl).data('breakpoint');
 
-    if (viewport >= productGridBreakpoint.lg) {
-        productGridCol(productGridEl, 3);
-        productGridToggleClass('[value="col3"]')
-    } else if (viewport >= productGridBreakpoint.xs) {
-        productGridCol(productGridEl, 2);
-        productGridToggleClass('[value="col2"]')
-    } else {
-        productGridCol(productGridEl, 1);
-        productGridToggleClass('[value="col2"]')
+    if (viewport != breakpoint) {
+        if (viewport >= productGridBreakpoint.lg) {
+            productGridCol(productGridEl, 3);
+            productGridToggleClass('[value="col3"]');
+        } else if (viewport >= productGridBreakpoint.xxs) {
+            productGridCol(productGridEl, 2);
+            productGridToggleClass('[value="col2"]');
+        } else if (viewport < productGridBreakpoint.xxs) {
+            productGridCol(productGridEl, 1);
+            productGridToggleClass('[value="col2"]');
+        }
     }
+
+    $(productGridEl).data('breakpoint', viewport);
 }
 var productGridSetTrigger = function() {
     if ($(window).width() >= productGridBreakpoint.lg) {
@@ -734,6 +715,7 @@ var productGridSetTrigger = function() {
 }
 
 $(document).ready(function() {
+    productGridSet();
     productGridSetTrigger();
 
     $(window).resize(function() {
@@ -746,7 +728,7 @@ $(document).ready(function() {
         if (val == 'list') {
             productGridList()
         } else if (val == 'col2') {
-            if($(window).width() >= productGridBreakpoint.xs){
+            if($(window).width() >= productGridBreakpoint.xxs){
                 productGridCol(productGridEl, 2)
             } else {
                 productGridCol(productGridEl, 1)
@@ -785,53 +767,67 @@ var productGridList2 = function() {
 }
 var productGridSet2 = function() {
     var viewport = $(window).width();
+    var breakpoint = $(productGrid2El).data('breakpoint');
 
-    if (viewport < productGridBreakpoint.xs) {
-        productGridCol(productGrid2El, 1);
-        productGridToggleDisabled(1, false);
-        productGridToggleDisabled(2);
-        productGridToggleDisabled(3);
-        productGridToggleDisabled(4);
-        productGridToggleDisabled(5);
-        productGridSelected(1);
-        $(productGridSwicther2El).niceSelect('update');
-    } else if (viewport < productGridBreakpoint.sm) {
-        productGridCol(productGrid2El, 2);
-        productGridToggleDisabled(1);
-        productGridToggleDisabled(2, false)
-        productGridToggleDisabled(3);
-        productGridToggleDisabled(4);
-        productGridToggleDisabled(5);
-        productGridSelected(2);
-        $(productGridSwicther2El).niceSelect('update');
-    } else if (viewport < productGridBreakpoint.lg) {
-        productGridCol(productGrid2El, 3);
-        productGridToggleDisabled(1);
-        productGridToggleDisabled(2);
-        productGridToggleDisabled(3, false)
-        productGridToggleDisabled(4);
-        productGridToggleDisabled(5);
-        productGridSelected(3);
-        $(productGridSwicther2El).niceSelect('update');
-    } else if (viewport < productGridBreakpoint.xl) {
-        productGridCol(productGrid2El, 4);
-        productGridToggleDisabled(1);
-        productGridToggleDisabled(2);
-        productGridToggleDisabled(3, false);
-        productGridToggleDisabled(4, false)
-        productGridToggleDisabled(5);
-        productGridSelected(4);
-        $(productGridSwicther2El).niceSelect('update');
-    } else if (viewport >= productGridBreakpoint.xl) {
-        productGridCol(productGrid2El, 5);
-        productGridToggleDisabled(1);
-        productGridToggleDisabled(2);
-        productGridToggleDisabled(3);
-        productGridToggleDisabled(4, false);
-        productGridToggleDisabled(5, false)
-        productGridSelected(5);
-        $(productGridSwicther2El).niceSelect('update');
+    if (viewport != breakpoint) {
+        if (viewport < productGridBreakpoint.xxs) {
+            productGridCol(productGrid2El, 1);
+            productGridToggleDisabled(1, false);
+            productGridToggleDisabled(2);
+            productGridToggleDisabled(3);
+            productGridToggleDisabled(4);
+            productGridToggleDisabled(5);
+            productGridSelected(1);
+            $(productGridSwicther2El).niceSelect('update');
+        } else if (viewport < productGridBreakpoint.xs) {
+            productGridCol(productGrid2El, 2);
+            productGridToggleDisabled(1, false);
+            productGridToggleDisabled(2, false);
+            productGridToggleDisabled(3);
+            productGridToggleDisabled(4);
+            productGridToggleDisabled(5);
+            productGridSelected(2);
+            $(productGridSwicther2El).niceSelect('update');
+        } else if (viewport < productGridBreakpoint.sm) {
+            productGridCol(productGrid2El, 2);
+            productGridToggleDisabled(1);
+            productGridToggleDisabled(2, false)
+            productGridToggleDisabled(3);
+            productGridToggleDisabled(4);
+            productGridToggleDisabled(5);
+            productGridSelected(2);
+            $(productGridSwicther2El).niceSelect('update');
+        } else if (viewport < productGridBreakpoint.lg) {
+            productGridCol(productGrid2El, 3);
+            productGridToggleDisabled(1);
+            productGridToggleDisabled(2);
+            productGridToggleDisabled(3, false)
+            productGridToggleDisabled(4);
+            productGridToggleDisabled(5);
+            productGridSelected(3);
+            $(productGridSwicther2El).niceSelect('update');
+        } else if (viewport < productGridBreakpoint.xl) {
+            productGridCol(productGrid2El, 4);
+            productGridToggleDisabled(1);
+            productGridToggleDisabled(2);
+            productGridToggleDisabled(3, false);
+            productGridToggleDisabled(4, false)
+            productGridToggleDisabled(5);
+            productGridSelected(4);
+            $(productGridSwicther2El).niceSelect('update');
+        } else if (viewport >= productGridBreakpoint.xl) {
+            productGridCol(productGrid2El, 5);
+            productGridToggleDisabled(1);
+            productGridToggleDisabled(2);
+            productGridToggleDisabled(3);
+            productGridToggleDisabled(4, false);
+            productGridToggleDisabled(5, false)
+            productGridSelected(5);
+            $(productGridSwicther2El).niceSelect('update');
+        }
     }
+
+    $(productGrid2El).data('breakpoint', viewport);
 }
 $(document).ready(function() {
     productGridSet2();
@@ -1001,9 +997,10 @@ var widget4CarouselConfig = {
             }
         },
         {
-            breakpoint: 375,
+            breakpoint: 768,
             settings: {
-                slidesToShow: 1,
+                slidesToShow: 2,
+                arrows: false,
             }
         }
     ],
